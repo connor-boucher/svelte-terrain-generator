@@ -43,13 +43,13 @@
     };
 
     let environmentProperties = {
-        background: false,
-        backgroundColor: '#ffefd6',
+        void: true,
+        color: '#ffefd6',
         grid: true,
     };
-    $: backgroundColor = environmentProperties.background
-        ? environmentProperties.backgroundColor
-        : 'black';
+    $: backgroundColor = environmentProperties.void
+        ? 'black'
+        : environmentProperties.color;
 
     let planeGeometryProperties = {
         width: 4,
@@ -99,11 +99,10 @@
 
     const environmentFolder = gui.addFolder('Environment');
     environmentFolder
-        .add(environmentProperties, 'background')
+        .add(environmentProperties, 'void')
         .onChange(regenerateEnvironment);
     environmentFolder
-        .addColor(environmentProperties, 'backgroundColor')
-        .name('background color')
+        .addColor(environmentProperties, 'color')
         .onChange(regenerateEnvironment);
     environmentFolder
         .add(environmentProperties, 'grid', 0, 1)
@@ -136,7 +135,7 @@
         background={new THREE.Color(backgroundColor)}
         fog={new THREE.FogExp2(
             backgroundColor,
-            environmentProperties.background ? 0.1 : 0
+            environmentProperties.void ? 0 : 0.1
         )}
         shadows
     >
@@ -144,9 +143,7 @@
             <SC.Mesh
                 geometry={new THREE.PlaneGeometry(50, 50)}
                 material={new THREE.MeshStandardMaterial({
-                    color: environmentProperties.background
-                        ? 'burlywood'
-                        : 'black',
+                    color: environmentProperties.void ? 'black' : 'burlywood',
                 })}
                 rotation={[-Math.PI / 2, 0, 0]}
                 receiveShadow
