@@ -7,6 +7,8 @@ uniform float u_z_offset;
 uniform float u_speed;
 uniform float u_time;
 
+varying float v_elevation;
+
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
 vec2 fade(vec2 t) {return t*t*t*(t*(t*6.0-15.0)+10.0);}
 
@@ -61,7 +63,8 @@ float getElevation(vec3 pos) {
 }
 
 void main() {
-    vec3 pos = vec3(position.xy, getElevation(position));
+    v_elevation = getElevation(position);
+    vec3 pos = vec3(position.xy, v_elevation);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
 }
 `;

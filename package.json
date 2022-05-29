@@ -7,11 +7,13 @@
     "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json"
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "deploy": "gh-pages -d dist -t"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.30",
     "@tsconfig/svelte": "^2.0.1",
+    "@types/dat.gui": "^0.7.7",
     "@types/three": "^0.140.0",
     "svelte": "^3.44.0",
     "svelte-check": "^2.2.7",
