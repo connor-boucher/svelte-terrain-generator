@@ -1,4 +1,5 @@
 export default `
+uniform float u_height;
 uniform float u_time;
 
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
@@ -39,7 +40,7 @@ float getPerlinNoise2d(vec2 P)
 }
 
 float getElevation(vec3 pos) {
-    return getPerlinNoise2d(pos.xy + u_time) * 0.01;
+    return getPerlinNoise2d(pos.xy + u_time) * 0.01 * (u_height * 0.8);
 }
 
 void main() {
