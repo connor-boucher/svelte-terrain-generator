@@ -6,14 +6,16 @@
     import { rgbFromHex } from './lib/colorUtils';
     import { printLoadedShaders } from './lib/shaderDebug';
 
-    import vertexShader from './shaders/terrainVert';
-    import fragmentShader from './shaders/terrainFrag';
+    import terrainVert from './shaders/terrainVert';
+    import terrainFrag from './shaders/terrainFrag';
+    import waterVert from './shaders/waterVert';
+    import waterFrag from './shaders/waterFrag';
 
     //
     // SHADER SHIT
     //
 
-    printLoadedShaders(vertexShader, fragmentShader);
+    printLoadedShaders(terrainVert, terrainFrag);
 
     let uniforms = {
         u_frequency: { type: 'f', value: 1.0 },
@@ -37,8 +39,8 @@
     //
 
     let terrainProperties = {
-        water: false,
-        waterHeight: 0,
+        water: true,
+        waterHeight: 0.5,
         color: '#ff3e00',
     };
 
@@ -53,9 +55,9 @@
 
     let planeGeometryProperties = {
         width: 4,
-        length: 4,
+        depth: 4,
         widthSegments: 150,
-        lengthSegments: 150,
+        depthSegments: 150,
     };
 
     let planeMaterialProperties = {
@@ -87,7 +89,7 @@
         .onChange(updateTerrainColor);
     terrainFolder.add(terrainProperties, 'water').onChange(regenerateTerrain);
     terrainFolder
-        .add(terrainProperties, 'waterHeight', -0.5, 0.5)
+        .add(terrainProperties, 'waterHeight', 0, 1)
         .name('water height')
         .step(0.01)
         .onChange(regenerateTerrain);
@@ -113,13 +115,15 @@
         .add(planeGeometryProperties, 'width', 1, 20)
         .onChange(regeneratePlaneGeometry);
     geometryFolder
-        .add(planeGeometryProperties, 'length', 1, 20)
+        .add(planeGeometryProperties, 'depth', 1, 20)
         .onChange(regeneratePlaneGeometry);
     geometryFolder
         .add(planeGeometryProperties, 'widthSegments', 10, 500)
+        .name('width segments')
         .onChange(regeneratePlaneGeometry);
     geometryFolder
-        .add(planeGeometryProperties, 'lengthSegments', 10, 500)
+        .add(planeGeometryProperties, 'depthSegments', 10, 500)
+        .name('depth segments')
         .onChange(regeneratePlaneGeometry);
 
     const materialFolder = gui.addFolder('Material');
@@ -162,37 +166,52 @@
             {/if}
         </SC.Group>
 
-        {#if terrainProperties.water}
+        <SC.Group>
+            {#if terrainProperties.water}
+                <SC.Mesh
+                    geometry={new THREE.BoxGeometry(
+                        planeGeometryProperties.width,
+                        terrainProperties.waterHeight * uniforms.u_height.value,
+                        planeGeometryProperties.depth,
+                        planeGeometryProperties.widthSegments / 10,
+                        1,
+                        planeGeometryProperties.depthSegments / 10
+                    )}
+                    material={new THREE.ShaderMaterial({
+                        uniforms,
+                        vertexShader: waterVert,
+                        fragmentShader: waterFrag,
+                        transparent: true,
+                    })}
+                    position={[
+                        0,
+                        (terrainProperties.waterHeight *
+                            uniforms.u_height.value) /
+                            2 -
+                            uniforms.u_height.value / 2,
+                        0,
+                    ]}
+                />
+            {/if}
+
             <SC.Mesh
                 geometry={new THREE.PlaneGeometry(
                     planeGeometryProperties.width,
-                    planeGeometryProperties.length,
+                    planeGeometryProperties.depth,
                     planeGeometryProperties.widthSegments,
-                    planeGeometryProperties.lengthSegments
+                    planeGeometryProperties.depthSegments
                 )}
-                material={new THREE.MeshBasicMaterial({ color: '#0e87cc' })}
+                material={new THREE.ShaderMaterial({
+                    uniforms,
+                    vertexShader: terrainVert,
+                    fragmentShader: terrainFrag,
+                    wireframe: planeMaterialProperties.wireframe,
+                    side: THREE.DoubleSide,
+                })}
                 rotation={[-Math.PI / 2, 0, 0]}
-                position={[0, terrainProperties.waterHeight, 0]}
+                castShadow
             />
-        {/if}
-
-        <SC.Mesh
-            geometry={new THREE.PlaneGeometry(
-                planeGeometryProperties.width,
-                planeGeometryProperties.length,
-                planeGeometryProperties.widthSegments,
-                planeGeometryProperties.lengthSegments
-            )}
-            material={new THREE.ShaderMaterial({
-                uniforms,
-                vertexShader,
-                fragmentShader,
-                wireframe: planeMaterialProperties.wireframe,
-                side: THREE.DoubleSide,
-            })}
-            rotation={[-Math.PI / 2, 0, 0]}
-            castShadow
-        />
+        </SC.Group>
 
         <SC.PerspectiveCamera position={[1, 1, 3]} />
         <SC.OrbitControls maxPolarAngle={Math.PI * 0.51} />
