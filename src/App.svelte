@@ -39,7 +39,7 @@
     //
 
     let terrainProperties = {
-        water: true,
+        water: false,
         waterHeight: 0.5,
         color: '#ff3e00',
     };
